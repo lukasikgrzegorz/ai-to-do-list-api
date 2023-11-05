@@ -4,6 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const usersRouter = require("./routes/users.js");
+const tasksRouter = require("./routes/tasks.js");
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(cors());
 require("./config/passportConfig.js");
 
 app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/tasks", tasksRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Not found" });

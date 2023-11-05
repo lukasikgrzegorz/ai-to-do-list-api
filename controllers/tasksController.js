@@ -2,31 +2,40 @@ const tasksService = require("../services/tasksService");
 const taskSchema = require("../schemas/tasksSchema");
 
 const getTasks = async (req, res, next) => {
-  const { page = 1, limit = 10, isDone } = req.query; 
+  const { page = 1, limit = 10, isDone } = req.query;
   const skip = (page - 1) * limit;
   const owner = req.user._id;
 
   try {
     let tasks;
+    let totalTasks = 0;
 
     if (isDone !== undefined) {
-      tasks = await tasksService.updateTasksIsDone({ owner, isDone });
-    } else {
-      const totalTasks = await tasksService.countTasks({ owner });
+      const isTaskDone = isDone === "true"; // Konwersja wartości isDone na boolean
+      totalTasks = await tasksService.countTasks({ owner, isDone: isTaskDone });
       tasks = await tasksService.listTasks({
-        filters: { owner, isDone: false }, 
+        filters: { owner, isDone: isTaskDone },
         skip,
         limit,
         sortByDate: true,
         sortByCreationDate: true,
       });
-
-      res.json({
-        status: "success",
-        code: 200,
-        data: { tasks, totalTasks },
+    } else {
+      totalTasks = await tasksService.countTasks({ owner, isDone: false });
+      tasks = await tasksService.listTasks({
+        filters: { owner, isDone: false },
+        skip,
+        limit,
+        sortByDate: true,
+        sortByCreationDate: true,
       });
     }
+
+    res.json({
+      status: "success",
+      code: 200,
+      data: { tasks, totalTasks },
+    });
   } catch (error) {
     console.error(error);
     next(error);

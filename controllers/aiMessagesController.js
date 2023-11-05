@@ -30,14 +30,17 @@ const createMessage = async (req, res, next) => {
 
     const messageResponse = await action(body.message);
 
-    // const messageData = { ...body, response };
-    // messageData.owner = owner;
-    // await addMessage(messageData);
+    if (messageResponse === null)
+      response = `Sorry. Your question is beyond my abilities. I can only operate on the task list and the tasks associated with it.`;
+
+    const messageData = { ...body, response };
+    messageData.owner = owner;
+    await addMessage(messageData);
 
     res.json({
       status: "created",
       code: 201,
-      message: messageResponse,
+      message: response,
     });
   } catch (error) {
     console.error(error);
